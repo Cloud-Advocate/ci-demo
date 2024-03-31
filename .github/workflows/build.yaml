@@ -1,6 +1,9 @@
 name: book manager app build application
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 env:
   WORKSPACE: book-manager-app
 permissions:
@@ -30,6 +33,20 @@ jobs:
           name: Junit Test
           path: 'book-manager-app/target/surefire-reports/*.xml' 
           reporter: java-junit
+
+      - name: JaCoCo Code Coverage Report
+        id: jacoco_reporter
+        uses: PavanMudigonda/jacoco-reporter@v5.0
+        with:
+          coverage_results_path: ${{ github.workspace }}/book-manager-app/target/site/jacoco/jacoco.xml
+          coverage_report_name: Coverage
+          coverage_report_title: JaCoCo
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          skip_check_run: false
+          minimum_coverage: 80
+          fail_below_threshold: false
+          publish_only_summary: false
+
 
       - name: Build with Maven
         run: cd ${WORKSPACE} && mvn -B verify checkstyle:checkstyle
